@@ -44,3 +44,18 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """Return string representation of user"""
         return self.email
 
+
+class TodoTask(models.Model):
+    """Database model for tasks"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete = models.CASCADE
+    )
+    task_name = models.CharField(max_length=255)
+    task_done = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        """String representation of the model"""
+        return self.task_name
+    

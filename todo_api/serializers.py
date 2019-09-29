@@ -24,3 +24,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+
+class TodoTaskSerializer(serializers.ModelSerializer):
+    """Serializes users TodoTasks"""
+
+    class Meta:
+        model = models.TodoTask
+        fields = ('id', 'user', 'task_name', 'task_done', 'created_on',)
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'task_name': {'read_only': True}
+        }
+
+class TaskDeleteSerializer(serializers.Serializer):
+    """Serializes tasks that are about to be deleted"""
+    ids = serializers.ListField(
+        child=serializers.IntegerField()
+    )
