@@ -13,7 +13,7 @@ class TodoListPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """Check if user is managing his tasks"""
-        return obj.id == request.user.id
+        return obj.user == request.user
 
 class TaskDeletePermission(permissions.BasePermission):
     """Allow user to delete his tasks"""

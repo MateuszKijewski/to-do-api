@@ -52,7 +52,23 @@ class TodoTask(models.Model):
         on_delete = models.CASCADE
     )
     task_name = models.CharField(max_length=255)
-    task_done = models.BooleanField(default=False)
+    TO_DO = 'To do'
+    IN_PROGRESS = 'In progress'
+    REJECTED = 'Rejected'
+    DONE = 'Done'
+    POSTPONED = 'Postponed'
+    TASK_STATUS_CHOICES = [
+        (TO_DO, 'To do'),
+        (IN_PROGRESS, 'In progress'),
+        (REJECTED, 'Rejected'),
+        (DONE, 'Done'),
+        (POSTPONED, 'Postponed')
+    ]
+    task_status = models.CharField(
+        max_length=255,
+        choices=TASK_STATUS_CHOICES,
+        default=TO_DO
+    )    
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

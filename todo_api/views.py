@@ -1,5 +1,3 @@
-import json
-
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
@@ -32,6 +30,7 @@ class TodoTaskViewset(viewsets.ModelViewSet):
     serializer_class = serializers.TodoTaskSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (permissions.TodoListPermission, IsAuthenticated,)
+    filterset_fields = ['task_status']
     
     def get_queryset(self):
         """Gets the queryset for an authenticated user"""
@@ -40,7 +39,7 @@ class TodoTaskViewset(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Sets the user profile to the logged in user"""
-        serializer.save(user=self.request.user, task_done=False)
+        serializer.save(user=self.request.user, task_status=models.TodoTask.TO_DO)
 
 
 class TaskDeleteApiView(APIView):
