@@ -4,6 +4,8 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 from django.conf import settings
 
+from todo_api import scrapers
+
 
 class UserProfileManager(BaseUserManager):
     """Manager for user profiles"""
@@ -22,12 +24,13 @@ class UserProfileManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, name, password):
-        """Create a new superuser"""
+        """Create and save a new superuser with given details"""
         user = self.create_user(email, name, password)
         user.is_superuser = True
+        user.is_staff = True
         user.save(using=self._db)
 
-        return user      
+        return user 
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -35,6 +38,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserProfileManager()
     USERNAME_FIELD = 'email'
@@ -74,4 +78,17 @@ class TodoTask(models.Model):
     def __str__(self):
         """String representation of the model"""
         return self.task_name
-    
+
+
+class QuoteGroup(models.Model):
+    """Database model for quote groups"""
+    name = models.CharField(max_length=255)
+    quotes = models.CharField(max_length=16384)
+    authors = models.CharField(max_length=2048)
+
+    def update(self):
+        self.quotes, self.authors = scrapers.inspirational_quotes_scraper()
+        self.save()
+
+    def __str__(self):
+        return self.name

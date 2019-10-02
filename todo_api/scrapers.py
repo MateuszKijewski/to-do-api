@@ -1,15 +1,37 @@
 import requests
 import urllib.request
 import sys
+import json
 
 from bs4 import BeautifulSoup
 
 
-url = "https://www.brainyquote.com/topics/inspirational-quotes"
-response = requests.get(url)
+def inspirational_quotes_scraper():
+    """Scrapes inspirational quotes from BrainyQuote"""
 
-soup = BeautifulSoup(response.text, 'html.parser')
-x = soup.find_all(title="view quote")
-result=[]
-for quote in x:
-    result.append(quote.string)
+    urls = [
+        "https://www.brainyquote.com/topics/work-quotes",
+        "https://www.brainyquote.com/topics/failure-quotes",
+        "https://www.brainyquote.com/topics/succes-quotes"
+    ]
+    quotes = []
+    authors = []
+
+    for url in urls:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        scraped_quotes = soup.find_all(title="view quote")
+        scraped_authors = soup.find_all(title="view author")
+
+
+        for quote, author in zip(scraped_quotes, scraped_authors):
+            quotes.append(quote.string)
+            authors.append(author.string)
+
+
+
+    quotes = json.dumps(quotes)
+    authors = json.dumps(authors)
+
+    return (quotes, authors)

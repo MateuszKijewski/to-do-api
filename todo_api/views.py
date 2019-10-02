@@ -1,3 +1,6 @@
+import json
+import random
+
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
@@ -10,6 +13,7 @@ from rest_framework.settings import api_settings
 from todo_api import serializers
 from todo_api import models
 from todo_api import permissions
+from todo_api import scrapers
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -69,4 +73,21 @@ class TaskDeleteApiView(APIView):
                 'request': request.data
             }
         )
-                    
+
+
+class InspirationalQuote(APIView):
+    """Outputs a random inspirational quote"""
+
+    def get(self, request, format=None):
+        quote_group = models.QuoteGroup.objects.get(name="inspirational quotes")
+
+        quotes = json.loads(quote_group.quotes)
+        authors = json.loads(quote_group.authors)
+        quote_number = random.randint(0, (len(quotes)-1))
+
+        return Response({
+            'quote': quotes[quote_number],
+            'author': authors[quote_number]
+        })
+
+    
