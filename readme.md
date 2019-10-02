@@ -1,5 +1,5 @@
-ToDo App
-Simple ToDoApp created using Django Rest Framework
+#ToDo App
+###Simple ToDoApp created using Django Rest Framework
 
 app features:
 - full registration and login system
