@@ -49,13 +49,44 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class TodoTaskList(models.Model):
+    """Database model for task lists"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete = models.CASCADE
+    )
+    name = models.CharField(max_length=255)
+    NEW = 'New'
+    IN_PROGRESS = 'In progress'
+    DONE = 'Done'
+    LIST_STATUS_CHOICES = [
+        (NEW, 'New'),
+        (IN_PROGRESS, 'In progress'),
+        (DONE, 'Done')
+    ]
+    status = models.CharField(
+        max_length=255,
+        choices=LIST_STATUS_CHOICES,
+        default=NEW
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def task_count(self):
+        """returns number of tasks in a todo list"""
+        return TodoTask.objects.filter(task_list=self.name).count()
+
+    def __str__(self):
+        """string representation of a model"""
+        return self.name
+
+
 class TodoTask(models.Model):
     """Database model for tasks"""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete = models.CASCADE
     )
-    task_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     TO_DO = 'To do'
     IN_PROGRESS = 'In progress'
     REJECTED = 'Rejected'
@@ -68,16 +99,20 @@ class TodoTask(models.Model):
         (DONE, 'Done'),
         (POSTPONED, 'Postponed')
     ]
-    task_status = models.CharField(
+    status = models.CharField(
         max_length=255,
         choices=TASK_STATUS_CHOICES,
         default=TO_DO
     )    
     created_on = models.DateTimeField(auto_now_add=True)
+    task_list = models.ForeignKey(
+        TodoTaskList,
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         """String representation of the model"""
-        return self.task_name
+        return self.name
 
 
 class QuoteGroup(models.Model):

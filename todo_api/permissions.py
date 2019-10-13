@@ -9,14 +9,14 @@ class UpdateOwnProfile(permissions.BasePermission):
         return obj.id == request.user.id
 
 class TodoListPermission(permissions.BasePermission):
-    """Allow user to create and check his tasks"""
+    """Allow user to create and check his Todos"""
 
     def has_object_permission(self, request, view, obj):
         """Check if user is managing his tasks"""
         return obj.user == request.user
 
-class TaskDeletePermission(permissions.BasePermission):
-    """Allow user to delete his tasks"""
+class DeletePermission(permissions.BasePermission):
+    """Allow user to delete objects"""
 
     def has_object_permission(self, request, view, obj):
         """Check if user can delete objects"""

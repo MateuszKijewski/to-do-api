@@ -43,27 +43,49 @@ class TodoTaskViewset(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Sets the user profile to the logged in user"""
-        serializer.save(user=self.request.user, task_status=models.TodoTask.TO_DO)
+        serializer.save(
+            user=self.request.user
+        )
 
 
-class TaskDeleteApiView(APIView):
+class TodoListViewset(viewsets.ModelViewSet):
+    """Handle managing todo-lists"""
+    serializer_class = serializers.TaskListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.TodoListPermission, IsAuthenticated,)
+
+    def get_queryset(self):
+        """Gets the queryset for authenticated user"""
+        user = self.request.user
+        task_list = self.kwargs['']
+        return models.TodoTaskList.objects.filter(user=user)
+    
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user"""
+        serializer.save(user=self.request.user)
+
+    def retrieve(self, request, pk=None):
+        pass
+
+class ObjectDelete(APIView):
     """Handle tasks deleting"""
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (permissions.TaskDeletePermission, IsAuthenticated,)
+    permission_classes = (permissions.DeletePermission, IsAuthenticated,)
+    queryset = None
 
     def post(self, request, format=None):
         """Deletes objects that user posted"""
-        serializer = serializers.TaskDeleteSerializer(data=request.data)
+        serializer = serializers.DeleteSerializer(data=request.data)
         if serializer.is_valid():
             ids = serializer.validated_data.get('ids')            
             for value in ids:
                 value = int(value)
                 try:
-                    task = models.TodoTask.objects.get(pk=value)
-                except models.TodoTask.DoesNotExist:
+                    task = self.queryset.objects.get(pk=value)
+                except self.queryset.DoesNotExist:
                     return Response({'message': 'Some of the given objects doesnt exist'})
             for value in ids:
-                task = models.TodoTask.objects.get(pk=value)
+                task = self.queryset.objects.get(pk=value)
                 task.delete()
             return Response({'message': 'Objects were succesfully deleted'})
         
@@ -74,6 +96,12 @@ class TaskDeleteApiView(APIView):
             }
         )
 
+
+class TaskDelete(ObjectDelete):
+    queryset = models.TodoTask
+
+class TaskListDelete(ObjectDelete):
+    queryset = models.TodoTaskList
 
 class InspirationalQuote(APIView):
     """Outputs a random inspirational quote"""
