@@ -1,6 +1,10 @@
 import json
 import random
 
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.utils import text
+
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
@@ -9,6 +13,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework import mixins
 
 from todo_api import serializers
 from todo_api import models
@@ -34,17 +39,22 @@ class TodoTaskViewset(viewsets.ModelViewSet):
     serializer_class = serializers.TodoTaskSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (permissions.TodoListPermission, IsAuthenticated,)
-    filterset_fields = ['task_status']
-    
+    filterset_fields = ['status']
+
     def get_queryset(self):
         """Gets the queryset for an authenticated user"""
         user = self.request.user
-        return models.TodoTask.objects.filter(user=user)
+        list_id = self.kwargs.get('list_id')
+        task_list = models.TodoTaskList.objects.get(id=list_id)
+        return models.TodoTask.objects.filter(user=user, task_list=task_list)
     
     def perform_create(self, serializer):
         """Sets the user profile to the logged in user"""
+        list_id = self.kwargs.get('list_id')
+        task_list = models.TodoTaskList.objects.get(id=list_id)
         serializer.save(
-            user=self.request.user
+            user=self.request.user,
+            task_list=task_list
         )
 
 
@@ -57,15 +67,11 @@ class TodoListViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         """Gets the queryset for authenticated user"""
         user = self.request.user
-        task_list = self.kwargs['']
         return models.TodoTaskList.objects.filter(user=user)
     
     def perform_create(self, serializer):
         """Sets the user profile to the logged in user"""
         serializer.save(user=self.request.user)
-
-    def retrieve(self, request, pk=None):
-        pass
 
 class ObjectDelete(APIView):
     """Handle tasks deleting"""
@@ -107,7 +113,7 @@ class InspirationalQuote(APIView):
     """Outputs a random inspirational quote"""
 
     def get(self, request, format=None):
-        quote_group = models.QuoteGroup.objects.get(name="inspirational quotes")
+        quote_group = models.QuoteGroup.objects.get(name="motivational_quotes")
 
         quotes = json.loads(quote_group.quotes)
         authors = json.loads(quote_group.authors)
@@ -119,3 +125,11 @@ class InspirationalQuote(APIView):
         })
 
     
+class TestViewset(APIView):
+    """Testing things"""
+    def get(self, request, **kwargs):
+
+        info = kwargs.get('info')
+        return Response({
+            'message': info
+        })

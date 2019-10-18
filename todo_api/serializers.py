@@ -44,9 +44,10 @@ class TodoTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.TodoTask
-        fields = ('id', 'user', 'name', 'status', 'created_on',)
+        fields = ('id', 'user', 'name', 'status', 'created_on', 'task_list',)
         extra_kwargs = {
-            'user': {'read_only': True}
+            'user': {'read_only': True},
+            'task_list': {'read_only': True}
         }
 
 
